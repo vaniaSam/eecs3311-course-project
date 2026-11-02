@@ -1,4 +1,4 @@
-
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,9 +79,12 @@ public class Pantry {
         double total = 0;
 
         for (PantryItem item : findItems(ingredientName)) {
-            if (item.getUnit().equalsIgnoreCase(unit.trim())) {
+            if (item.getUnit().equalsIgnoreCase(unit.trim())
+                    && (item.getExpiryDate() == null
+                        || !item.getExpiryDate().isBefore(LocalDate.now()))) {
                 total += item.getAmount();
             }
+            
         }
 
         return total;
@@ -118,4 +121,56 @@ public class Pantry {
     public int size() {
         return items.size();
     }
+
+
+    /**
+     * Finds pantry items that have already expired.
+     *
+     * An item expires when its expiry date is before today.
+     * Items expiring today are not considered expired.
+     */
+    public List<PantryItem> getExpiredItems() {
+        List<PantryItem> expiredItems = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        for (PantryItem item : items) {
+            if (item.getExpiryDate() != null
+                    && item.getExpiryDate().isBefore(today)) {
+                expiredItems.add(item);
+            }
+        }
+
+        return expiredItems;
+    }
+
+    /**
+     * Finds pantry items expiring within the next specified
+     * number of days, including today.
+     *
+     * Already-expired items are excluded.
+     */
+    public List<PantryItem> getExpiringSoonItems(int days) {
+        if (days < 0) {
+            throw new IllegalArgumentException(
+                "Number of days cannot be negative"
+            );
+        }
+
+        List<PantryItem> expiringSoon = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        LocalDate deadline = today.plusDays(days);
+
+        for (PantryItem item : items) {
+            LocalDate expiryDate = item.getExpiryDate();
+
+            if (expiryDate != null
+                    && !expiryDate.isBefore(today)
+                    && !expiryDate.isAfter(deadline)) {
+                expiringSoon.add(item);
+            }
+        }
+
+        return expiringSoon;
+    }
+
 }

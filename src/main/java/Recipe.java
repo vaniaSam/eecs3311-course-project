@@ -3,61 +3,74 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Represents a recipe in the meal-planning application.
- *
- * Stores recipe information used for searching,
- * filtering, and generating meal plans.
- */
 public class Recipe {
-
     private final String name;
     private final List<String> ingredients;
+    private final List<IngredientRequirement> requirements;
     private final List<String> instructions;
     private final int cookingTimeMinutes;
     private final int servings;
 
-    /**
-     * Creates a recipe with its ingredients and instructions.
-     */
-    public Recipe(
-            String name,
-            List<String> ingredients,
-            List<String> instructions,
-            int cookingTimeMinutes,
-            int servings) {
+    // Original constructor retained for existing tests.
+    public Recipe(String name, List<String> ingredients,
+                  List<String> instructions,
+                  int cookingTimeMinutes, int servings) {
+        this(name, ingredients, List.of(), instructions,
+             cookingTimeMinutes, servings);
+    }
 
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException(
-                "Recipe name cannot be empty"
-            );
+    private Recipe(String name, List<String> ingredients,
+                   List<IngredientRequirement> requirements,
+                   List<String> instructions,
+                   int cookingTimeMinutes, int servings) {
+
+        if (name == null || name.isBlank()
+                || cookingTimeMinutes <= 0 || servings <= 0) {
+            throw new IllegalArgumentException("Invalid recipe details");
         }
 
-        Objects.requireNonNull(
-            ingredients, "Ingredients cannot be null"
-        );
+        Objects.requireNonNull(ingredients);
+        Objects.requireNonNull(requirements);
+        Objects.requireNonNull(instructions);
 
-        Objects.requireNonNull(
-            instructions, "Instructions cannot be null"
-        );
-
-        if (ingredients.isEmpty()) {
-            throw new IllegalArgumentException(
-                "Recipe must have at least one ingredient"
-            );
-        }
-
-        if (cookingTimeMinutes <= 0 || servings <= 0) {
-            throw new IllegalArgumentException(
-                "Cooking time and servings must be positive"
-            );
+        if (ingredients.isEmpty()
+                || ingredients.stream().anyMatch(
+                    s -> s == null || s.isBlank())
+                || instructions.stream().anyMatch(Objects::isNull)
+                || requirements.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Invalid recipe content");
         }
 
         this.name = name.trim();
         this.ingredients = new ArrayList<>(ingredients);
+        this.requirements = new ArrayList<>(requirements);
         this.instructions = new ArrayList<>(instructions);
         this.cookingTimeMinutes = cookingTimeMinutes;
         this.servings = servings;
+    }
+
+    // New factory for recipes with measured ingredients.
+    public static Recipe withRequirements(
+            String name,
+            List<IngredientRequirement> requirements,
+            List<String> instructions,
+            int cookingTimeMinutes,
+            int servings) {
+
+        Objects.requireNonNull(requirements);
+
+        if (requirements.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Recipe must have ingredients");
+        }
+
+        List<String> names = new ArrayList<>();
+        for (IngredientRequirement item : requirements) {
+            names.add(Objects.requireNonNull(item).getName());
+        }
+
+        return new Recipe(name, names, requirements,
+                          instructions, cookingTimeMinutes, servings);
     }
 
     public String getName() {
@@ -66,6 +79,10 @@ public class Recipe {
 
     public List<String> getIngredients() {
         return new ArrayList<>(ingredients);
+    }
+
+    public List<IngredientRequirement> getIngredientRequirements() {
+        return new ArrayList<>(requirements);
     }
 
     public List<String> getInstructions() {
@@ -80,22 +97,16 @@ public class Recipe {
         return servings;
     }
 
-    /**
-     * Checks whether a recipe contains an ingredient.
-     * Ingredient names are compared without case sensitivity.
-     */
     public boolean containsIngredient(String ingredientName) {
         if (ingredientName == null || ingredientName.isBlank()) {
             return false;
         }
 
         for (String ingredient : ingredients) {
-            if (ingredient.equalsIgnoreCase(
-                    ingredientName.trim())) {
+            if (ingredient.equalsIgnoreCase(ingredientName.trim())) {
                 return true;
             }
         }
-
         return false;
     }
 }

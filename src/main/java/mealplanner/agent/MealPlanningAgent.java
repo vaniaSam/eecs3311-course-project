@@ -260,8 +260,11 @@ public class MealPlanningAgent {
         for (JsonElement e : array(o, "steps")) {
             b.step(e.getAsString());
         }
-        for (JsonElement e : array(o, "tags")) {
-            b.tag(e.getAsString());
+        JsonElement tags = o.get("tags");
+        if (tags != null && tags.isJsonArray()) { // tags are optional
+            for (JsonElement e : tags.getAsJsonArray()) {
+                b.tag(e.getAsString());
+            }
         }
         Recipe recipe = b.build();
         if (recipe.getSteps().isEmpty()) {
@@ -425,12 +428,19 @@ public class MealPlanningAgent {
         double budget = req.getProfile().getWeeklyBudget() * req.getDays() / 7.0;
         Map<String, Integer> uses = new HashMap<>();
         double spent = 0;
+        // Lower bound of the cost of filling each remaining slot with its cheapest suitable recipe.
+        Map<MealType, Double> cheapest = new HashMap<>();
+        for (MealType type : req.getMealTypes()) {
+            cheapest.put(type, suitableFor(ranked, type).stream()
+                .mapToDouble(r -> r.getCostPerServing() * req.getServingsPerMeal()).min().orElse(0));
+        }
         for (int i = 0; i < slots.size(); i++) {
             Slot slot = slots.get(i);
             List<Recipe> suitable = suitableFor(ranked, slot.type());
-            double cheapest = suitable.stream().mapToDouble(r -> r.getCostPerServing() * req.getServingsPerMeal())
-                .min().orElse(0);
-            int remainingAfter = slots.size() - i - 1;
+            double remainingMin = 0;
+            for (Slot later : slots.subList(i + 1, slots.size())) {
+                remainingMin += cheapest.get(later.type());
+            }
             Recipe pick = null;
             for (int pass = 0; pass < 2 && pick == null; pass++) {
                 for (Recipe r : suitable) {
@@ -439,7 +449,7 @@ public class MealPlanningAgent {
                         continue;
                     }
                     double cost = r.getCostPerServing() * req.getServingsPerMeal();
-                    if (budget <= 0 || spent + cost + cheapest * remainingAfter <= budget + 1e-9) {
+                    if (budget <= 0 || spent + cost + remainingMin <= budget + 1e-9) {
                         pick = r;
                         break;
                     }

@@ -1,0 +1,977 @@
+{
+ "recipes": [
+  {
+   "id": "r01",
+   "name": "Vegetable Fried Rice",
+   "servings": 2,
+   "cookingTimeMinutes": 20,
+   "estimatedCost": 5.0,
+   "tags": [
+    "vegetarian",
+    "dairy-free",
+    "quick",
+    "asian"
+   ],
+   "ingredients": [
+    {
+     "name": "cooked rice",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "egg",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "carrot",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "frozen peas",
+     "quantity": 100,
+     "unit": "g"
+    },
+    {
+     "name": "soy sauce",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Dice the onion and carrot.",
+    "Scramble the eggs in a hot pan and set aside.",
+    "Stir-fry onion, carrot and peas for 4 minutes.",
+    "Add the cooked rice and soy sauce, stir-fry 3 minutes, fold in the egg."
+   ]
+  },
+  {
+   "id": "r02",
+   "name": "Chicken Stir-Fry",
+   "servings": 2,
+   "cookingTimeMinutes": 25,
+   "estimatedCost": 9.5,
+   "tags": [
+    "dairy-free",
+    "asian"
+   ],
+   "ingredients": [
+    {
+     "name": "chicken breast",
+     "quantity": 300,
+     "unit": "g"
+    },
+    {
+     "name": "broccoli",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "bell pepper",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "soy sauce",
+     "quantity": 3,
+     "unit": "tbsp"
+    },
+    {
+     "name": "garlic",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "rice",
+     "quantity": 150,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Cook the rice.",
+    "Slice the chicken and brown it in a hot pan.",
+    "Add garlic, broccoli and pepper; stir-fry 5 minutes.",
+    "Add soy sauce and serve over rice."
+   ]
+  },
+  {
+   "id": "r03",
+   "name": "Spaghetti Marinara",
+   "servings": 2,
+   "cookingTimeMinutes": 25,
+   "estimatedCost": 4.5,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "dairy-free",
+    "italian",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "pasta",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "canned tomatoes",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "garlic",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "olive oil",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Boil the pasta.",
+    "Soften onion and garlic in olive oil.",
+    "Add tomatoes and simmer 15 minutes.",
+    "Toss with the pasta."
+   ]
+  },
+  {
+   "id": "r04",
+   "name": "Red Lentil Soup",
+   "servings": 4,
+   "cookingTimeMinutes": 40,
+   "estimatedCost": 6.0,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "gluten-free",
+    "dairy-free",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "lentils",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "carrot",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "canned tomatoes",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "vegetable broth",
+     "quantity": 750,
+     "unit": "ml"
+    }
+   ],
+   "steps": [
+    "Chop onion and carrots and soften in a pot.",
+    "Add lentils, tomatoes and broth.",
+    "Simmer 25 minutes until lentils are soft.",
+    "Blend partly and season."
+   ]
+  },
+  {
+   "id": "r05",
+   "name": "Spinach Omelette",
+   "servings": 2,
+   "cookingTimeMinutes": 15,
+   "estimatedCost": 4.2,
+   "tags": [
+    "vegetarian",
+    "gluten-free",
+    "quick",
+    "breakfast"
+   ],
+   "ingredients": [
+    {
+     "name": "egg",
+     "quantity": 4,
+     "unit": "pcs"
+    },
+    {
+     "name": "spinach",
+     "quantity": 60,
+     "unit": "g"
+    },
+    {
+     "name": "cheddar cheese",
+     "quantity": 40,
+     "unit": "g"
+    },
+    {
+     "name": "milk",
+     "quantity": 50,
+     "unit": "ml"
+    }
+   ],
+   "steps": [
+    "Whisk eggs with milk.",
+    "Wilt the spinach in a pan.",
+    "Pour in the eggs, add cheese, fold when set."
+   ]
+  },
+  {
+   "id": "r06",
+   "name": "Overnight Oats",
+   "servings": 2,
+   "cookingTimeMinutes": 10,
+   "estimatedCost": 2.5,
+   "tags": [
+    "vegetarian",
+    "breakfast",
+    "quick",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "oats",
+     "quantity": 100,
+     "unit": "g"
+    },
+    {
+     "name": "milk",
+     "quantity": 250,
+     "unit": "ml"
+    },
+    {
+     "name": "banana",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "honey",
+     "quantity": 1,
+     "unit": "tbsp"
+    }
+   ],
+   "steps": [
+    "Mix oats, milk and honey in a jar.",
+    "Refrigerate overnight.",
+    "Top with sliced banana."
+   ]
+  },
+  {
+   "id": "r07",
+   "name": "Black Bean Tacos",
+   "servings": 2,
+   "cookingTimeMinutes": 20,
+   "estimatedCost": 6.0,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "dairy-free",
+    "mexican",
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "name": "tortilla",
+     "quantity": 6,
+     "unit": "pcs"
+    },
+    {
+     "name": "black beans",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "bell pepper",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "lemon",
+     "quantity": 1,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Saute onion and pepper.",
+    "Add drained beans and mash lightly.",
+    "Season with lemon juice.",
+    "Fill warm tortillas."
+   ]
+  },
+  {
+   "id": "r08",
+   "name": "Baked Salmon with Potatoes",
+   "servings": 2,
+   "cookingTimeMinutes": 35,
+   "estimatedCost": 14.0,
+   "tags": [
+    "gluten-free",
+    "dairy-free",
+    "pescatarian"
+   ],
+   "ingredients": [
+    {
+     "name": "salmon",
+     "quantity": 300,
+     "unit": "g"
+    },
+    {
+     "name": "potato",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "lemon",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "olive oil",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "garlic",
+     "quantity": 2,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Cube potatoes, toss with oil and garlic, roast 15 minutes at 220C.",
+    "Add salmon with lemon slices.",
+    "Roast 12 more minutes."
+   ]
+  },
+  {
+   "id": "r09",
+   "name": "Chickpea Curry",
+   "servings": 2,
+   "cookingTimeMinutes": 30,
+   "estimatedCost": 7.0,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "gluten-free",
+    "dairy-free",
+    "indian"
+   ],
+   "ingredients": [
+    {
+     "name": "chickpeas",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "coconut milk",
+     "quantity": 400,
+     "unit": "ml"
+    },
+    {
+     "name": "curry paste",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "spinach",
+     "quantity": 100,
+     "unit": "g"
+    },
+    {
+     "name": "rice",
+     "quantity": 150,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Cook the rice.",
+    "Fry onion with curry paste.",
+    "Add chickpeas and coconut milk; simmer 15 minutes.",
+    "Stir in spinach and serve with rice."
+   ]
+  },
+  {
+   "id": "r10",
+   "name": "Beef Chili",
+   "servings": 4,
+   "cookingTimeMinutes": 45,
+   "estimatedCost": 11.0,
+   "tags": [
+    "gluten-free",
+    "dairy-free",
+    "mexican"
+   ],
+   "ingredients": [
+    {
+     "name": "ground beef",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "black beans",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "canned tomatoes",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "chili powder",
+     "quantity": 2,
+     "unit": "tbsp"
+    }
+   ],
+   "steps": [
+    "Brown the beef with onion.",
+    "Add chili powder, tomatoes and beans.",
+    "Simmer 30 minutes."
+   ]
+  },
+  {
+   "id": "r11",
+   "name": "Greek Salad",
+   "servings": 2,
+   "cookingTimeMinutes": 10,
+   "estimatedCost": 6.5,
+   "tags": [
+    "vegetarian",
+    "gluten-free",
+    "quick",
+    "mediterranean"
+   ],
+   "ingredients": [
+    {
+     "name": "cucumber",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "tomato",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "feta cheese",
+     "quantity": 100,
+     "unit": "g"
+    },
+    {
+     "name": "olive oil",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "onion",
+     "quantity": 0.5,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Chop cucumber, tomato and onion.",
+    "Top with feta and olive oil."
+   ]
+  },
+  {
+   "id": "r12",
+   "name": "Peanut Butter Banana Toast",
+   "servings": 1,
+   "cookingTimeMinutes": 5,
+   "estimatedCost": 1.8,
+   "tags": [
+    "vegetarian",
+    "breakfast",
+    "quick",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "bread",
+     "quantity": 2,
+     "unit": "slices"
+    },
+    {
+     "name": "peanut butter",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "banana",
+     "quantity": 1,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Toast the bread.",
+    "Spread peanut butter and top with banana slices."
+   ]
+  },
+  {
+   "id": "r13",
+   "name": "Tofu Veggie Bowl",
+   "servings": 2,
+   "cookingTimeMinutes": 30,
+   "estimatedCost": 6.5,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "dairy-free",
+    "asian"
+   ],
+   "ingredients": [
+    {
+     "name": "tofu",
+     "quantity": 300,
+     "unit": "g"
+    },
+    {
+     "name": "broccoli",
+     "quantity": 150,
+     "unit": "g"
+    },
+    {
+     "name": "carrot",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "rice",
+     "quantity": 150,
+     "unit": "g"
+    },
+    {
+     "name": "soy sauce",
+     "quantity": 2,
+     "unit": "tbsp"
+    }
+   ],
+   "steps": [
+    "Cook the rice.",
+    "Press and cube tofu, pan-fry until golden.",
+    "Steam broccoli and carrot.",
+    "Assemble bowls and drizzle soy sauce."
+   ]
+  },
+  {
+   "id": "r14",
+   "name": "Mushroom Risotto",
+   "servings": 2,
+   "cookingTimeMinutes": 40,
+   "estimatedCost": 8.0,
+   "tags": [
+    "vegetarian",
+    "gluten-free",
+    "italian"
+   ],
+   "ingredients": [
+    {
+     "name": "rice",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "mushroom",
+     "quantity": 250,
+     "unit": "g"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "parmesan cheese",
+     "quantity": 40,
+     "unit": "g"
+    },
+    {
+     "name": "vegetable broth",
+     "quantity": 750,
+     "unit": "ml"
+    },
+    {
+     "name": "butter",
+     "quantity": 20,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Soften onion in butter, add mushrooms.",
+    "Toast the rice, then add broth a ladle at a time for 20 minutes.",
+    "Stir in parmesan."
+   ]
+  },
+  {
+   "id": "r15",
+   "name": "Leftover Chicken Wraps",
+   "servings": 2,
+   "cookingTimeMinutes": 10,
+   "estimatedCost": 5.0,
+   "tags": [
+    "quick",
+    "leftovers"
+   ],
+   "ingredients": [
+    {
+     "name": "roast chicken",
+     "quantity": 250,
+     "unit": "g"
+    },
+    {
+     "name": "tortilla",
+     "quantity": 4,
+     "unit": "pcs"
+    },
+    {
+     "name": "lettuce",
+     "quantity": 100,
+     "unit": "g"
+    },
+    {
+     "name": "yogurt",
+     "quantity": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Shred the chicken.",
+    "Spread yogurt on tortillas, add lettuce and chicken, roll up."
+   ]
+  },
+  {
+   "id": "r16",
+   "name": "Rice Pudding",
+   "servings": 2,
+   "cookingTimeMinutes": 25,
+   "estimatedCost": 2.0,
+   "tags": [
+    "vegetarian",
+    "gluten-free",
+    "breakfast",
+    "leftovers",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "cooked rice",
+     "quantity": 300,
+     "unit": "g"
+    },
+    {
+     "name": "milk",
+     "quantity": 400,
+     "unit": "ml"
+    },
+    {
+     "name": "honey",
+     "quantity": 2,
+     "unit": "tbsp"
+    }
+   ],
+   "steps": [
+    "Simmer the cooked rice in milk for 20 minutes, stirring.",
+    "Sweeten with honey."
+   ]
+  },
+  {
+   "id": "r17",
+   "name": "Pasta Primavera",
+   "servings": 2,
+   "cookingTimeMinutes": 25,
+   "estimatedCost": 6.0,
+   "tags": [
+    "vegetarian",
+    "italian"
+   ],
+   "ingredients": [
+    {
+     "name": "pasta",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "broccoli",
+     "quantity": 150,
+     "unit": "g"
+    },
+    {
+     "name": "bell pepper",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "olive oil",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "parmesan cheese",
+     "quantity": 30,
+     "unit": "g"
+    },
+    {
+     "name": "garlic",
+     "quantity": 2,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Boil pasta, adding broccoli for the last 3 minutes.",
+    "Saute pepper and garlic in oil.",
+    "Toss everything with parmesan."
+   ]
+  },
+  {
+   "id": "r18",
+   "name": "Chicken Caesar Salad",
+   "servings": 2,
+   "cookingTimeMinutes": 25,
+   "estimatedCost": 8.5,
+   "tags": [
+    "high-protein"
+   ],
+   "ingredients": [
+    {
+     "name": "chicken breast",
+     "quantity": 250,
+     "unit": "g"
+    },
+    {
+     "name": "lettuce",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "parmesan cheese",
+     "quantity": 30,
+     "unit": "g"
+    },
+    {
+     "name": "bread",
+     "quantity": 2,
+     "unit": "slices"
+    },
+    {
+     "name": "yogurt",
+     "quantity": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Grill the chicken and slice.",
+    "Toast and cube the bread.",
+    "Toss lettuce with yogurt dressing, parmesan, croutons and chicken."
+   ]
+  },
+  {
+   "id": "r19",
+   "name": "Potato and Egg Hash",
+   "servings": 2,
+   "cookingTimeMinutes": 30,
+   "estimatedCost": 4.0,
+   "tags": [
+    "vegetarian",
+    "gluten-free",
+    "dairy-free",
+    "breakfast",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "name": "potato",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "egg",
+     "quantity": 4,
+     "unit": "pcs"
+    },
+    {
+     "name": "onion",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "bell pepper",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "olive oil",
+     "quantity": 2,
+     "unit": "tbsp"
+    }
+   ],
+   "steps": [
+    "Dice and pan-fry potatoes 15 minutes.",
+    "Add onion and pepper.",
+    "Make wells and cook eggs until set."
+   ]
+  },
+  {
+   "id": "r20",
+   "name": "Banana Pancakes",
+   "servings": 2,
+   "cookingTimeMinutes": 20,
+   "estimatedCost": 3.0,
+   "tags": [
+    "vegetarian",
+    "breakfast"
+   ],
+   "ingredients": [
+    {
+     "name": "flour",
+     "quantity": 150,
+     "unit": "g"
+    },
+    {
+     "name": "egg",
+     "quantity": 2,
+     "unit": "pcs"
+    },
+    {
+     "name": "milk",
+     "quantity": 200,
+     "unit": "ml"
+    },
+    {
+     "name": "banana",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "butter",
+     "quantity": 20,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Mash banana and whisk with eggs and milk.",
+    "Fold in flour.",
+    "Cook small pancakes in butter."
+   ]
+  },
+  {
+   "id": "r21",
+   "name": "Peanut Noodles",
+   "servings": 2,
+   "cookingTimeMinutes": 20,
+   "estimatedCost": 4.5,
+   "tags": [
+    "vegan",
+    "vegetarian",
+    "dairy-free",
+    "asian",
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "name": "pasta",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "peanut butter",
+     "quantity": 3,
+     "unit": "tbsp"
+    },
+    {
+     "name": "soy sauce",
+     "quantity": 2,
+     "unit": "tbsp"
+    },
+    {
+     "name": "carrot",
+     "quantity": 1,
+     "unit": "pcs"
+    },
+    {
+     "name": "cucumber",
+     "quantity": 1,
+     "unit": "pcs"
+    }
+   ],
+   "steps": [
+    "Cook the noodles.",
+    "Whisk peanut butter with soy sauce and hot water.",
+    "Toss with noodles and julienned carrot and cucumber."
+   ]
+  },
+  {
+   "id": "r22",
+   "name": "Stuffed Bell Peppers",
+   "servings": 4,
+   "cookingTimeMinutes": 50,
+   "estimatedCost": 10.0,
+   "tags": [
+    "gluten-free"
+   ],
+   "ingredients": [
+    {
+     "name": "bell pepper",
+     "quantity": 4,
+     "unit": "pcs"
+    },
+    {
+     "name": "ground beef",
+     "quantity": 300,
+     "unit": "g"
+    },
+    {
+     "name": "cooked rice",
+     "quantity": 200,
+     "unit": "g"
+    },
+    {
+     "name": "canned tomatoes",
+     "quantity": 400,
+     "unit": "g"
+    },
+    {
+     "name": "cheddar cheese",
+     "quantity": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": [
+    "Brown the beef, mix with rice and tomatoes.",
+    "Fill halved peppers, top with cheese.",
+    "Bake 30 minutes at 190C."
+   ]
+  }
+ ]
+}

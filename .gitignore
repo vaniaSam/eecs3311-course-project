@@ -1,2 +1,16 @@
+# Build output
 bin/
+target/
 *.class
+out/
+
+# Local secrets - never commit real API keys
+.env
+.env.*
+!.env.example
+config.local.json
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store

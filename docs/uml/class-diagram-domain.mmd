@@ -1,0 +1,139 @@
+classDiagram
+    direction LR
+    class RecipeService {
+        -recipes: Map~String, Recipe~
+        +search(terms) List~Recipe~
+        +getById(id) Optional~Recipe~
+        +findUsing(items, pantry) List~RecipeMatch~
+        +findUsingNames(names, pantry) List~RecipeMatch~
+        +scale(r, servings) Recipe
+        +saveGenerated(r) Recipe
+    }
+    class RecipeMatcher {
+        +getMissingIngredients(r, pantry) List~String~
+        +getMatchPercentage(r, pantry) double
+        +isFullyCookable(r, pantry) boolean
+    }
+    class RecipeMatch {
+        <<record>>
+        recipe, matchedIngredients, missingIngredients, fullyCookable
+    }
+    class RecipeCatalogLoader {
+        +loadDefault() List~Recipe~
+    }
+    class PantryService {
+        +addOrUpdate(item) PantryItem
+        +remove(name) int
+        +expiringWithin(days) List~PantryItem~
+        +findLeftovers() List~PantryItem~
+        +getPantry() Pantry
+    }
+    class ShoppingListService {
+        +build(plan, pantry) ShoppingList
+        +missingFor(req, pantry) ShoppingListItem
+        +consolidate(reqs) List~IngredientRequirement~
+    }
+    class MealPlanObserver {
+        <<interface Observer>>
+        +onMealPlanChanged(plan)
+    }
+    class ShoppingListSynchronizer {
+        <<Concrete Observer>>
+        -currentShoppingList: ShoppingList
+        +track(plan)
+        +onMealPlanChanged(plan)
+        +refresh()
+    }
+    class MealPlan {
+        <<Observer Subject / Command Receiver>>
+        -meals: List~PlannedMeal~
+        -observers: List~MealPlanObserver~
+        +addMeal(m)
+        +replaceMeal(old, next)
+        +removeMeal(m) boolean
+        +attach(o)
+        +detach(o)
+        +notifyObservers()
+        +getEstimatedCost() double
+    }
+    class PlannedMeal {
+        day: DayOfWeek
+        mealType: MealType
+        servings: int
+    }
+    class Recipe {
+        <<immutable>>
+        id, name, steps, cookingTimeMinutes
+        servings, estimatedCost, tags, source
+        +scaleTo(servings) Recipe
+        +containsIngredient(n) boolean
+    }
+    class RecipeBuilder["Recipe.Builder"] {
+        <<Builder>>
+        +ingredient(name, qty, unit)
+        +step(text)
+        +tag(t)
+        +build() Recipe
+    }
+    class IngredientRequirement {
+        name, quantity, unit
+        +scale(f) IngredientRequirement
+    }
+    class Pantry {
+        +addOrUpdate(item) PantryItem
+        +getAvailableQuantity(name, unit) double
+        +hasUsable(name) boolean
+        +getExpiredItems() List
+        +getExpiringSoonItems(days) List
+    }
+    class PantryItem {
+        ingredientName, amount, unit
+        expiryDate, kind: ItemKind, storageNote
+        +expiresWithin(days) boolean
+        +isExpired() boolean
+        +isLeftover() boolean
+    }
+    class UserProfile {
+        preferences, dislikedIngredients
+        restrictions, weeklyBudget
+        +updatePreferences(v)
+        +setRestrictions(v)
+        +setWeeklyBudget(b)
+    }
+    class PlanRequest {
+        profile, weekStart, priority: PlanPriority
+        userInstruction, days, mealTypes, servingsPerMeal
+        +validate() boolean
+    }
+    class PlanEdit {
+        <<record>>
+        operation: EditOperation
+        targetMeal, replacementMeal
+    }
+    class ShoppingList
+    class ShoppingListItem {
+        name, quantity, unit, note
+    }
+    class ValidationResult {
+        errors, warnings
+        +isValid() boolean
+    }
+    RecipeService --> "*" Recipe
+    RecipeService --> RecipeMatcher
+    RecipeService ..> RecipeMatch
+    RecipeCatalogLoader ..> RecipeBuilder
+    PantryService --> Pantry
+    Pantry *-- "*" PantryItem
+    MealPlan *-- "*" PlannedMeal
+    MealPlan o--> "*" MealPlanObserver
+    MealPlanObserver <|.. ShoppingListSynchronizer
+    ShoppingListSynchronizer --> ShoppingListService
+    ShoppingListSynchronizer --> PantryService
+    ShoppingListSynchronizer --> ShoppingList
+    ShoppingListService ..> ShoppingList
+    ShoppingList *-- "*" ShoppingListItem
+    PlannedMeal --> Recipe
+    Recipe *-- "1..*" IngredientRequirement
+    RecipeBuilder ..> Recipe : builds
+    PlanRequest --> UserProfile
+    PlanEdit --> PlannedMeal

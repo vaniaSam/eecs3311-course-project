@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor U as User
+    participant V as GUI / CLI
+    participant F as MealPlanningFacade
+    participant A as MealPlanningAgent
+    participant L as LLMClient
+    participant PV as PlanValidator
+    participant R as RecipeService
+    U->>V: request + instruction
+    V->>F: generateRecipe(req) (via controller)
+    F->>A: generateRecipe(req, pantry)
+    alt LLM not configured
+        A-->>F: failure "needs an LLM"
+    else
+        loop attempt 1..3
+            A->>L: complete(profile, pantry, JSON schema)
+            L-->>A: recipe JSON
+            A->>A: parseRecipe via Recipe.Builder (malformed -> revision request)
+            A->>PV: checkRecipe(recipe, profile)
+            alt valid
+                A-->>F: RecipeGenerationResult(recipe)
+            else violates restriction / dislike
+                A->>A: append errors as revision request
+            end
+        end
+    end
+    F-->>V: result
+    opt user clicks Save / types save-recipe
+        V->>F: saveGeneratedRecipe(recipe)
+        F->>R: saveGenerated(recipe) (unique ai- id)
+    end

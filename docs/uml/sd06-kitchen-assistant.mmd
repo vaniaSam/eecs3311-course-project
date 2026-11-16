@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor U as User
+    participant V as GUI / CLI
+    participant F as MealPlanningFacade
+    participant K as KitchenAssistant
+    participant L as LLMClient
+    participant T as AgentTool (e.g. expiring_items)
+    participant S as PantryService / RecipeService
+    U->>V: "What can I cook with food that expires soon?"
+    V->>F: askAssistant(question) (via controller)
+    F->>K: ask(question)
+    K->>K: conversation = system prompt + tool list + memory + question
+    loop up to 6 steps
+        K->>L: complete(conversation)
+        L-->>K: {"thought", "tool", "input"} or {"answer"}
+        alt tool call
+            K->>T: execute(input)
+            T->>S: read-only query
+            S-->>T: data
+            T-->>K: observation text
+            K->>K: append OBSERVATION to conversation
+        else final answer
+            K->>K: remember question and answer (bounded memory)
+            K-->>F: AssistantReply(answer, toolCalls, trace)
+        end
+    end
+    F-->>V: reply
+    V-->>U: answer + tools used + agent steps

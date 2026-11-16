@@ -1,0 +1,20 @@
+flowchart LR
+    User(("👤 User"))
+    LLM(("🤖 External LLM service"))
+    subgraph System["Meal Planning Agent"]
+        direction TB
+        UC01(["UC01 Manage food preferences and dietary constraints"])
+        UC02(["UC02 Manage pantry and expiry dates"])
+        UC03(["UC03 Search recipes by keywords / ingredients"])
+        UC04(["UC04 Get personalised recipe recommendations"])
+        UC05(["UC05 Generate AI recipe"])
+        UC06(["UC06 Generate weekly meal plan"])
+        UC07(["UC07 Adjust recipe servings"])
+        UC08(["UC08 Suggest ingredient substitutions"])
+        UC09(["UC09 Plan meals from leftovers"])
+        UC10(["UC10 Generate shopping list"])
+        UC11(["UC11 Modify meal plan using natural language (undo)"])
+        UC12(["UC12 Ask the kitchen assistant (NEW)"])
+    end
+    User --- UC01 & UC02 & UC03 & UC04 & UC05 & UC06 & UC07 & UC08 & UC09 & UC10 & UC11 & UC12
+    UC04 & UC05 & UC06 & UC08 & UC09 & UC11 & UC12 --- LLM

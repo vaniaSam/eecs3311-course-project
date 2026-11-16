@@ -1,0 +1,45 @@
+sequenceDiagram
+    actor U as User
+    participant V as MealPlannerGUI / CLI
+    participant C as MealPlannerController
+    participant F as MealPlanningFacade
+    participant A as MealPlanningAgent
+    participant S as MealPlanningStrategy
+    participant L as LLMClient
+    participant PV as PlanValidator
+    participant SY as ShoppingListSynchronizer
+    U->>V: priority, days, meals, servings, instruction
+    V->>C: buildRequest(...) then generatePlan(req)
+    C->>F: generatePlan(req)
+    F->>A: setStrategy(strategyFor(priority))
+    F->>A: generate(req, pantry)
+    A->>PV: checkRecipe(r, profile) for every recipe
+    A->>S: rank(eligible, req, pantry)
+    S-->>A: ranked candidates
+    alt LLM available
+        loop attempt 1..3
+            A->>L: complete(conversation with slots, budget, candidates)
+            L-->>A: JSON plan proposal
+            A->>A: parsePlan (unknown ids / slots become errors)
+            A->>PV: validate(plan, req)
+            alt valid
+                A-->>F: PlanGenerationResult(aiUsed=true)
+            else invalid
+                A->>A: append errors as revision request
+            end
+        end
+    end
+    opt LLM unavailable, failed or never valid
+        A->>A: assembleDeterministically(ranked, req)
+        A->>PV: validate(plan, req)
+        A-->>F: PlanGenerationResult(aiUsed=false, rationale)
+    end
+    alt accepted
+        F->>SY: track(plan) (attach observer, build shopping list)
+        F->>F: currentPlan = plan, commands.clear()
+    else rejected
+        F->>F: keep previous currentPlan
+    end
+    F-->>C: result
+    C-->>V: result
+    V-->>U: plan, validation messages, agent steps

@@ -1,0 +1,45 @@
+sequenceDiagram
+    actor U as User
+    participant V as GUI / CLI
+    participant C as MealPlannerController
+    participant F as MealPlanningFacade
+    participant A as MealPlanningAgent
+    participant L as LLMClient
+    participant PV as PlanValidator
+    participant P as PlanEditParser
+    participant X as CommandExecutor
+    participant K as ReplaceMealCommand / RemoveMealCommand
+    participant M as MealPlan
+    participant SY as ShoppingListSynchronizer
+    U->>V: "swap Tuesday dinner for something vegetarian"
+    V->>C: modifyPlan(text)
+    C->>F: modifyPlan(text)
+    alt no current plan
+        F-->>V: "Generate a plan first" (nothing changes)
+    else plan exists
+        F->>A: interpretPlanEdit(currentPlan, text, profile)
+        alt LLM available
+            A->>L: complete(plan slots + acceptable recipes + text)
+            L-->>A: {operation, day, mealType, replacementRecipeId}
+            A->>A: verify target slot and recipe id
+            A->>PV: checkRecipe(replacement, profile)
+            opt invalid answer
+                A->>L: revision request with the error (once)
+            end
+        else no LLM
+            A->>P: parse(text, plan, recipes, profile)
+        end
+        A-->>F: EditInterpretation(PlanEdit or message, trace)
+        alt edit available
+            F->>F: createEditCommand(edit, plan)
+            F->>X: execute(command)
+            X->>K: execute()
+            K->>M: replaceMeal(old, new) / removeMeal(meal)
+            M->>SY: onMealPlanChanged(plan)
+            SY->>SY: rebuild shopping list
+            F-->>V: PlanEditResult(applied=true)
+        else ambiguous / unsupported / invalid
+            F-->>V: PlanEditResult(applied=false, explanation)
+        end
+    end
+    Note over U,SY: Later: undo -> CommandExecutor.undoLast() -> command.undo() -> MealPlan notifies observer again

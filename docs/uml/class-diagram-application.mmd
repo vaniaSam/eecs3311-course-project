@@ -1,0 +1,181 @@
+classDiagram
+    direction LR
+    class MealPlannerGUI {
+        <<MVC View>>
+        -controller: MealPlannerController
+        +launch(controller)
+        -request() PlanRequest
+        -background(work, done)
+    }
+    class MealPlannerCLI {
+        <<MVC View>>
+        -controller: MealPlannerController
+        +run()
+        +execute(line) boolean
+    }
+    class ResultFormatter {
+        <<View helper>>
+        +plan(result, trace) String
+        +recommendations(result, trace) String
+        +edit(result, trace) String
+    }
+    class MealPlannerController {
+        <<MVC Controller>>
+        -facade: MealPlanningFacade
+        +saveProfile(budget, prefs, dislikes, restrictions) UserProfile
+        +managePantry(name, qty, unit, expiry, kind, note) PantryItem
+        +buildRequest(priority, days, meals, servings, note) PlanRequest
+        +searchRecipes(q) List~Recipe~
+        +searchByIngredients(csv) List~RecipeMatch~
+        +generatePlan(req) PlanGenerationResult
+        +modifyPlan(text) PlanEditResult
+        +askAssistant(q) AssistantReply
+    }
+    class MealPlanningFacade {
+        <<Facade>>
+        -currentPlan: MealPlan
+        -strategies: Map~PlanPriority, MealPlanningStrategy~
+        +saveProfile(p)
+        +managePantry(item) PantryItem
+        +searchRecipes(q) List~Recipe~
+        +searchByIngredients(names) List~RecipeMatch~
+        +recommendRecipes(req, limit) RecommendationResult
+        +generateRecipe(req) RecipeGenerationResult
+        +saveGeneratedRecipe(r) Recipe
+        +generatePlan(req) PlanGenerationResult
+        +scaleRecipe(id, servings) Recipe
+        +suggestSubstitutions(id, ingredient) SubstitutionResult
+        +planFromLeftovers(req) LeftoverPlanResult
+        +getShoppingList() ShoppingList
+        +modifyPlan(text) PlanEditResult
+        +createEditCommand(edit, plan) MealPlanCommand
+        +undoLastEdit() PlanEditResult
+        +askAssistant(q) AssistantReply
+    }
+    class MealPlanningAgent {
+        <<Strategy Context / AI Agent>>
+        -strategy: MealPlanningStrategy
+        -llm: LLMClient
+        -validator: PlanValidator
+        +recommend(req, pantry, limit) RecommendationResult
+        +generateRecipe(req, pantry) RecipeGenerationResult
+        +generate(req, pantry) PlanGenerationResult
+        +suggestSubstitutions(r, ing, profile, pantry) SubstitutionResult
+        +planFromLeftovers(items, req, pantry) LeftoverPlanResult
+        +interpretPlanEdit(plan, text, profile) EditInterpretation
+        +setStrategy(s)
+    }
+    class MealPlanningStrategy {
+        <<interface Strategy>>
+        +name() String
+        +score(r, req, pantry) double
+        +explain(r, req, pantry) String
+        +rank(recipes, req, pantry) List~Recipe~
+    }
+    class BudgetFirstStrategy {
+        <<Concrete Strategy>>
+    }
+    class PantryFirstStrategy {
+        <<Concrete Strategy>>
+    }
+    class LLMClient {
+        <<interface Adapter Target>>
+        +complete(messages) String
+        +complete(prompt) String
+        +isAvailable() boolean
+        +describe() String
+    }
+    class OpenAICompatibleLLMClient {
+        <<Adapter>>
+        -baseUrl, model, apiKey
+        +complete(messages) String
+    }
+    class UnconfiguredLLMClient {
+        +complete(messages) String
+    }
+    class LLMClientFactory {
+        <<Factory>>
+        +create(config) LLMClient
+    }
+    class AppConfig {
+        +load() AppConfig
+        +isLlmConfigured() boolean
+    }
+    class PlanValidator {
+        +checkRecipe(r, profile) ValidationResult
+        +validate(plan, req) ValidationResult
+    }
+    class DietaryRules {
+        +violates(restriction, ingredient) boolean
+    }
+    class PlanEditParser {
+        +parse(text, plan, recipes, profile, v) Outcome
+    }
+    class SubstitutionCatalog {
+        +lookup(ingredient) List~Entry~
+    }
+    class KitchenAssistant {
+        <<F12 tool-using agent>>
+        -memory: List~ChatMessage~
+        +ask(question) AssistantReply
+        +clearMemory()
+    }
+    class AgentTool {
+        <<interface>>
+        +name() String
+        +execute(input) String
+    }
+    class MealPlanCommand {
+        <<interface Command>>
+        +execute()
+        +undo()
+        +describe() String
+    }
+    class ReplaceMealCommand {
+        <<Concrete Command>>
+    }
+    class RemoveMealCommand {
+        <<Concrete Command>>
+    }
+    class CommandExecutor {
+        <<Invoker>>
+        -history: Deque~MealPlanCommand~
+        +execute(c)
+        +undoLast() Optional
+    }
+    MealPlannerGUI --> MealPlannerController
+    MealPlannerCLI --> MealPlannerController
+    MealPlannerGUI ..> ResultFormatter
+    MealPlannerCLI ..> ResultFormatter
+    MealPlannerController --> MealPlanningFacade
+    MealPlanningFacade --> MealPlanningAgent
+    MealPlanningFacade --> CommandExecutor
+    MealPlanningFacade --> KitchenAssistant
+    MealPlanningFacade ..> MealPlanCommand : creates
+    MealPlanningFacade --> RecipeService
+    MealPlanningFacade --> PantryService
+    MealPlanningFacade --> ShoppingListSynchronizer
+    MealPlanningAgent o--> MealPlanningStrategy
+    MealPlanningStrategy <|.. BudgetFirstStrategy
+    MealPlanningStrategy <|.. PantryFirstStrategy
+    MealPlanningAgent --> LLMClient
+    MealPlanningAgent --> PlanValidator
+    MealPlanningAgent --> RecipeService
+    MealPlanningAgent ..> PlanEditParser
+    MealPlanningAgent ..> SubstitutionCatalog
+    PlanValidator ..> DietaryRules
+    LLMClient <|.. OpenAICompatibleLLMClient
+    LLMClient <|.. UnconfiguredLLMClient
+    LLMClientFactory ..> LLMClient : creates
+    LLMClientFactory ..> AppConfig
+    KitchenAssistant --> LLMClient
+    KitchenAssistant o--> "*" AgentTool
+    MealPlanCommand <|.. ReplaceMealCommand
+    MealPlanCommand <|.. RemoveMealCommand
+    CommandExecutor o--> "*" MealPlanCommand
+    ReplaceMealCommand --> MealPlan : receiver
+    RemoveMealCommand --> MealPlan : receiver
+    class RecipeService
+    class PantryService
+    class ShoppingListSynchronizer
+    class MealPlan

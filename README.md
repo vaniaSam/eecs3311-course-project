@@ -58,7 +58,7 @@ LLM_MODEL=gpt-4o-mini
 | Provider | `LLM_BASE_URL` | Example `LLM_MODEL` |
 |----------|----------------|---------------------|
 | OpenAI (Stage 1 choice) | `https://api.openai.com/v1` | `gpt-4o-mini` |
-| Groq (free tier) | `https://api.groq.com/openai/v1` | `llama-3.1-8b-instant` |
+| Groq (free tier) | `https://api.groq.com/openai/v1` | `openai/gpt-oss-20b` |
 | Google Gemini (free tier) | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.0-flash` |
 | OpenRouter | `https://openrouter.ai/api/v1` | `meta-llama/llama-3.1-8b-instruct:free` |
 | Ollama (local, free) | `http://localhost:11434/v1` | `llama3.2` (key can be any text) |
@@ -90,7 +90,7 @@ Starts the **CLI**. Alternatively `mvn exec:java -Dexec.args="--cli"`.
 mvn test
 ```
 
-Runs the 78 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
+Runs the 80 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
 
 ```bash
 xvfb-run mvn test -Dheadless=false -Dtest=GuiSmokeTest -Dscreenshots=docs/screenshots

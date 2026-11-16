@@ -7,7 +7,7 @@ development container has no display recorder with narration and cannot reach an
 ## Before recording
 
 1. `cp .env.example .env`, put your real key in `.env`. **Never show `.env` on screen.** Close any
-   editor tab that contains it. The status bar shows only the model name (e.g. `gpt-4o-mini via api.openai.com`).
+   editor tab that contains it. The status bar shows only the model name (e.g. `openai/gpt-oss-20b via api.groq.com`).
 2. `mvn package` then start the app fresh for each recording (the sample pantry dates are relative to today).
 3. Use OBS Studio, the Windows Game Bar (Win+G), or macOS Screenshot (Cmd+Shift+5) with microphone on.
 4. Recommended: **Video 1 = GUI (F01–F12)**, **Video 2 = CLI (F01–F12)**, about 10–12 min each.
@@ -24,7 +24,7 @@ For every segment say: the **feature ID and name**, **what you type/click**, **w
 
 | # | Feature | Actions | Say / point out | Error / alternative case |
 |---|---------|---------|-----------------|--------------------------|
-| 0 | Intro | Show the window and the status bar | "AI enabled: model …" — key comes from local `.env`, not shown | – |
+| 0 | Intro | Show the window and the status bar | "AI enabled: openai/gpt-oss-20b via api.groq.com" — key comes from local `.env`, not shown | – |
 | 1 | F01 Profile | Profile tab: budget `80`, preferences `quick meals, asian`, restrictions `vegetarian` → Save profile | Deterministic; values used by every planning feature | Budget `-5` → error, profile unchanged |
 | 2 | F02 Pantry | Pantry tab: add `tofu`, `300`, `g`, expiry `+5`; click *Expiring within days* (3), *Show leftovers*, *Show expired* | Status column marks EXPIRED (yogurt) and *expires soon*; expired stock never counts | Quantity `abc` → "Quantity must be a number" |
 | 3 | F03 Search | Recipes tab: keyword `pasta` → *Keyword search*; type `spinach, egg` → *Search by ingredients*; *Use my pantry* | Cookable recipes first, missing ingredients listed; deterministic, no AI | Keyword `zzz` → "No recipes match" |

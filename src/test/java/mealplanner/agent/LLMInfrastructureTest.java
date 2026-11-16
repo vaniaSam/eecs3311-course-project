@@ -131,4 +131,15 @@ class LLMInfrastructureTest {
         assertThrows(LLMException.class, () -> JsonExtractor.extractObject("{broken: }"));
         assertThrows(LLMException.class, () -> JsonExtractor.extractObject(""));
     }
+
+    @Test
+    void groqToolUseFailedReturnsTheAttemptedCall() {
+        OpenAICompatibleLLMClient client = new OpenAICompatibleLLMClient("http://x/v1", "k", "m", 10);
+        String body = "{\"error\":{\"message\":\"Tool choice is none, but model called a tool\","
+            + "\"type\":\"invalid_request_error\",\"code\":\"tool_use_failed\","
+            + "\"failed_generation\":\"{\\\"name\\\": \\\"expiring_items\\\", \\\"arguments\\\": {\\\"days\\\": 3}}\"}}";
+        String reply = client.parse(400, body);
+        assertEquals("expiring_items", JsonExtractor.extractObject(reply).get("name").getAsString());
+        assertThrows(LLMException.class, () -> client.parse(400, "{\"error\":{\"code\":\"other\"}}"));
+    }
 }

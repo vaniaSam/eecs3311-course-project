@@ -89,4 +89,16 @@ class KitchenAssistantTest {
         assertEquals("Plain text works", assistant(new ScriptedLLMClient().reply("Plain text works")).ask("hi")
             .answer());
     }
+
+    @Test
+    void acceptsNativeFunctionCallShapeAndStringArguments() {
+        ScriptedLLMClient llm = new ScriptedLLMClient()
+            .reply("{\"name\":\"expiring_items\",\"arguments\":{\"days\":2}}")
+            .reply("{\"name\":\"get_recipe\",\"arguments\":\"{\\\"id\\\":\\\"r05\\\"}\"}")
+            .reply("{\"answer\":\"Spinach Omelette\"}");
+        AssistantReply reply = assistant(llm).ask("what expires?");
+        assertTrue(reply.success());
+        assertEquals(2, reply.toolCalls().size());
+        assertTrue(llm.calls.get(2).get(llm.calls.get(2).size() - 1).content().contains("Spinach Omelette"));
+    }
 }

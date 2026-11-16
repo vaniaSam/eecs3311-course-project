@@ -96,6 +96,15 @@ public class OpenAICompatibleLLMClient implements LLMClient {
         if (status == 429) {
             throw new LLMException("The LLM provider rate limit or quota was exceeded (HTTP 429). Try again later.");
         }
+        if (status == 400) {
+            String attempted = failedToolGeneration(responseBody);
+            if (attempted != null) {
+                // Some models (e.g. gpt-oss on Groq) answer a tool-using prompt with a native function
+                // call, which the provider rejects because no API tools were declared. The attempted call
+                // is returned in "failed_generation"; hand it to the agent, which accepts that shape.
+                return attempted;
+            }
+        }
         if (status < 200 || status >= 300) {
             throw new LLMException("The LLM provider returned HTTP " + status + ": " + abbreviate(responseBody));
         }
@@ -118,6 +127,20 @@ public class OpenAICompatibleLLMClient implements LLMClient {
             }
             throw new LLMException("Unexpected response format from the LLM provider", e);
         }
+    }
+
+    /** Returns error.failed_generation for a "tool_use_failed" error body, otherwise {@code null}. */
+    static String failedToolGeneration(String body) {
+        try {
+            JsonObject error = JsonParser.parseString(body).getAsJsonObject().getAsJsonObject("error");
+            if (error != null && "tool_use_failed".equals(JsonExtractor.string(error, "code", ""))) {
+                String generation = JsonExtractor.string(error, "failed_generation", "");
+                return generation.isBlank() ? null : generation;
+            }
+        } catch (RuntimeException e) {
+            // not a JSON error body
+        }
+        return null;
     }
 
     @Override

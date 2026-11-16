@@ -86,15 +86,14 @@ public class KitchenAssistant {
                 remember(question, answer);
                 return new AssistantReply(answer, calls, true, trace);
             }
-            String toolName = JsonExtractor.string(json, "tool", "");
+            // Accept our {"tool","input"} format and the native function-call shape {"name","arguments"}.
+            String toolName = JsonExtractor.string(json, "tool", JsonExtractor.string(json, "name", ""));
             AgentTool tool = tools.get(toolName);
             String observation;
             if (tool == null) {
                 observation = "ERROR: unknown tool '" + toolName + "'. Available: " + String.join(", ", tools.keySet());
             } else {
-                JsonElement inputElement = json.get("input");
-                JsonObject input = inputElement != null && inputElement.isJsonObject()
-                    ? inputElement.getAsJsonObject() : new JsonObject();
+                JsonObject input = toolInput(json.has("input") ? json.get("input") : json.get("arguments"));
                 calls.add(toolName + input);
                 try {
                     observation = tool.execute(input);
@@ -111,6 +110,21 @@ public class KitchenAssistant {
         }
         return new AssistantReply("I could not finish within " + MAX_STEPS + " steps. Try a more specific question.",
             calls, false, trace);
+    }
+
+    /** Tool input given as a JSON object or as a JSON-encoded string; anything else means no input. */
+    private static JsonObject toolInput(JsonElement element) {
+        if (element != null && element.isJsonObject()) {
+            return element.getAsJsonObject();
+        }
+        if (element != null && element.isJsonPrimitive()) {
+            try {
+                return JsonExtractor.extractObject(element.getAsString());
+            } catch (LLMException e) {
+                return new JsonObject();
+            }
+        }
+        return new JsonObject();
     }
 
     /** Forgets the conversation history. */
@@ -144,7 +158,8 @@ public class KitchenAssistant {
             + "{\"thought\":\"why\",\"tool\":\"tool_name\",\"input\":{...}}\nor\n"
             + "{\"thought\":\"why\",\"answer\":\"final answer for the user\"}\n"
             + "You cannot change the user's data; tell them which feature to use for changes. "
-            + "Do not claim food is allergen-safe.\nTOOLS:\n");
+            + "Do not claim food is allergen-safe. Do not use built-in function calling; write the JSON object "
+            + "as plain text.\nTOOLS:\n");
         for (AgentTool t : tools.values()) {
             sb.append("- ").append(t.name()).append(": ").append(t.description()).append('\n');
         }

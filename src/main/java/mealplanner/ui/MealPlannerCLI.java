@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import mealplanner.agent.LeftoverPlanResult;
 import mealplanner.agent.RecipeGenerationResult;
 import mealplanner.controller.MealPlannerController;
 import mealplanner.model.MealPlan;
@@ -173,7 +174,12 @@ public class MealPlannerCLI {
                 }
                 case "leftovers" -> {
                     progress("Agent is planning with leftovers");
-                    out.println(ResultFormatter.leftovers(controller.planFromLeftovers(request(rest)), showTrace));
+                    LeftoverPlanResult r = controller.planFromLeftovers(request(rest));
+                    out.println(ResultFormatter.leftovers(r, showTrace));
+                    if (r.generated()) {
+                        lastGenerated = r.recipe();
+                        out.println("Type 'save-recipe' to add the new recipe to your collection.");
+                    }
                 }
                 case "shopping" -> out.println("Shopping list:\n" + controller.getShoppingList().describe());
                 case "edit" -> {

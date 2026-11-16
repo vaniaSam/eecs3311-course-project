@@ -45,6 +45,7 @@ import javax.swing.text.DefaultCaret;
 
 import mealplanner.agent.AssistantReply;
 import mealplanner.agent.DietaryRules;
+import mealplanner.agent.LeftoverPlanResult;
 import mealplanner.agent.RecipeGenerationResult;
 import mealplanner.controller.MealPlannerController;
 import mealplanner.controller.PlanEditResult;
@@ -314,8 +315,14 @@ public class MealPlannerGUI extends JFrame {
                 refreshPlan();
             }));
         JButton leftovers = aiButton("Plan from leftovers (F09)");
-        leftovers.addActionListener(e -> background(plannerOutput,
-            () -> ResultFormatter.leftovers(controller.planFromLeftovers(request()), true), plannerOutput::setText));
+        leftovers.addActionListener(e -> background(plannerOutput, () -> {
+            LeftoverPlanResult r = controller.planFromLeftovers(request());
+            lastGenerated = r.generated() ? r.recipe() : null;
+            return ResultFormatter.leftovers(r, true);
+        }, text -> {
+            plannerOutput.setText(text);
+            saveRecipe.setEnabled(lastGenerated != null);
+        }));
 
         JPanel top = new JPanel(new GridLayout(3, 1));
         top.add(request);

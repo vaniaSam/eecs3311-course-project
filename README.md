@@ -8,7 +8,6 @@ plan edits (with undo) and answer questions through a tool-using assistant. Ever
 from both a **Swing GUI** and a **command-line interface (CLI)**.
 
 * Stage 2 report: [`stage2-report.pdf`](stage2-report.pdf) (Word version: `stage2-report.docx`)
-* Demo recording script: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)
 * UML diagrams: [`docs/uml/`](docs/uml) · GUI screenshots: [`docs/screenshots/`](docs/screenshots)
 
 ## Features

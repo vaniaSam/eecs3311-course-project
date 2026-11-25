@@ -93,7 +93,7 @@ public class OpenAICompatibleLLMClient implements LLMClient {
             } catch (ProviderParseException e) {
                 if (attempt >= MAX_PARSE_ATTEMPTS) {
                     throw new LLMException("The model's reply could not be read by the LLM provider after "
-                        + MAX_PARSE_ATTEMPTS + " attempts. Please try again.", e);
+                        + MAX_PARSE_ATTEMPTS + " attempts. Please try again.", e, true);
                 }
             }
         }
@@ -107,7 +107,7 @@ public class OpenAICompatibleLLMClient implements LLMClient {
         private static final long serialVersionUID = 1L;
 
         ProviderParseException(String message) {
-            super(message);
+            super(message, null, true);
         }
     }
 

@@ -22,10 +22,12 @@ import com.google.gson.JsonObject;
 public class KitchenAssistant {
 
     /** Maximum reasoning/tool steps per question. */
-    public static final int MAX_STEPS = 6;
+    public static final int MAX_STEPS = 8;
     /** Number of past question/answer messages remembered. */
     public static final int MEMORY_MESSAGES = 8;
     private static final int MAX_OBSERVATION_CHARS = 3000;
+    /** Correction messages sent when the provider cannot read the model's reply. */
+    static final int MAX_CORRECTIONS = 2;
 
     private final LLMClient llm;
     private final Map<String, AgentTool> tools = new LinkedHashMap<>();
@@ -55,11 +57,21 @@ public class KitchenAssistant {
         convo.addAll(memory);
         convo.add(ChatMessage.user(question.trim()));
 
+        int corrections = 0;
         for (int step = 1; step <= MAX_STEPS; step++) {
             String reply;
             try {
                 reply = llm.complete(convo);
             } catch (LLMException e) {
+                if (e.isProviderParseFailure() && corrections < MAX_CORRECTIONS) {
+                    // The provider could not read the model's reply; a short correction gives the model a new
+                    // conversation to answer instead of repeating the same request.
+                    corrections++;
+                    trace.add("Step " + step + ": the provider could not read the model's reply; asking it to answer again");
+                    convo.add(ChatMessage.user("Your last reply could not be read. Reply again with exactly one JSON "
+                        + "object as plain text: either {\"tool\":...,\"input\":{...}} or {\"answer\":\"...\"}."));
+                    continue;
+                }
                 trace.add("Step " + step + ": LLM call failed - " + e.getMessage());
                 return new AssistantReply("The AI service failed: " + e.getMessage(), calls, false, trace);
             }
@@ -158,6 +170,8 @@ public class KitchenAssistant {
             + "{\"thought\":\"why\",\"tool\":\"tool_name\",\"input\":{...}}\nor\n"
             + "{\"thought\":\"why\",\"answer\":\"final answer for the user\"}\n"
             + "You cannot change the user's data; tell them which feature to use for changes. "
+            + "For questions about the user's meal plan, shopping list, pantry or profile, use get_meal_plan, "
+            + "get_shopping_list, list_pantry or get_profile; search_recipes only searches the recipe collection. "
             + "Do not claim food is allergen-safe. Do not use built-in function calling; write the JSON object "
             + "as plain text.\nTOOLS:\n");
         for (AgentTool t : tools.values()) {

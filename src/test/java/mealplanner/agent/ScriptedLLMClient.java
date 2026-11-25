@@ -28,6 +28,14 @@ class ScriptedLLMClient implements LLMClient {
         return this;
     }
 
+    /** Simulates the provider being unable to read the model's output (HTTP 400 "Parsing failed"). */
+    ScriptedLLMClient failParse() {
+        replies.add(c -> {
+            throw new LLMException("could not be read", null, true);
+        });
+        return this;
+    }
+
     ScriptedLLMClient compute(Function<List<ChatMessage>, String> f) {
         replies.add(f);
         return this;

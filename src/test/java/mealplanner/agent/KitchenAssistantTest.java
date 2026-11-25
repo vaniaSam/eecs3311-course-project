@@ -101,4 +101,35 @@ class KitchenAssistantTest {
         assertEquals(2, reply.toolCalls().size());
         assertTrue(llm.calls.get(2).get(llm.calls.get(2).size() - 1).content().contains("Spinach Omelette"));
     }
+
+    @Test
+    void recoversWhenTheProviderCannotReadAReply() {
+        ScriptedLLMClient llm = new ScriptedLLMClient()
+            .reply("{\"tool\":\"expiring_items\",\"input\":{\"days\":3}}")
+            .failParse()
+            .reply("{\"answer\":\"Cook the Spinach Omelette first.\"}");
+        AssistantReply reply = assistant(llm).ask("Which meal should I cook first?");
+        assertTrue(reply.success(), reply.answer());
+        assertEquals("Cook the Spinach Omelette first.", reply.answer());
+        String correction = llm.calls.get(2).get(llm.calls.get(2).size() - 1).content();
+        assertTrue(correction.contains("could not be read"), correction);
+        assertTrue(reply.trace().describe().contains("asking it to answer again"));
+    }
+
+    @Test
+    void givesUpAfterTooManyUnreadableReplies() {
+        ScriptedLLMClient llm = new ScriptedLLMClient().failParse().failParse().failParse();
+        AssistantReply reply = assistant(llm).ask("hi");
+        assertFalse(reply.success());
+        assertEquals(KitchenAssistant.MAX_CORRECTIONS + 1, llm.calls.size());
+        assertTrue(reply.answer().contains("could not be read"));
+    }
+
+    @Test
+    void systemPromptPointsPlanQuestionsToTheRightTool() {
+        ScriptedLLMClient llm = new ScriptedLLMClient().reply("{\"answer\":\"ok\"}");
+        assistant(llm).ask("what is in my plan?");
+        String system = llm.calls.get(0).get(0).content();
+        assertTrue(system.contains("use get_meal_plan"));
+    }
 }

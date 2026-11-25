@@ -10,7 +10,7 @@ sequenceDiagram
     V->>F: askAssistant(question) (via controller)
     F->>K: ask(question)
     K->>K: conversation = system prompt + tool list + memory + question
-    loop up to 6 steps
+    loop up to 8 steps
         K->>L: complete(conversation)
         L-->>K: {"thought", "tool", "input"} or {"answer"}
         alt tool call

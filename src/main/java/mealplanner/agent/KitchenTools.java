@@ -28,7 +28,7 @@ public final class KitchenTools {
                                          Supplier<UserProfile> profile, Supplier<MealPlan> plan,
                                          Supplier<ShoppingList> shoppingList) {
         List<AgentTool> tools = new ArrayList<>();
-        tools.add(AgentTool.of("search_recipes", "keyword search over recipe names, ingredients and tags. "
+        tools.add(AgentTool.of("search_recipes", "keyword search over the recipe collection (names, ingredients, tags); not for the user's plan. "
             + "input: {\"query\":\"vegan pasta\"}", in -> {
                 List<Recipe> found = recipes.search(JsonExtractor.string(in, "query", ""));
                 return found.isEmpty() ? "No recipes found." : summaries(found);
@@ -83,7 +83,7 @@ public final class KitchenTools {
         }));
         tools.add(AgentTool.of("get_profile", "the user's budget, preferences, dislikes and restrictions. input: {}",
             in -> profile.get().describe()));
-        tools.add(AgentTool.of("get_meal_plan", "the current weekly meal plan. input: {}", in -> {
+        tools.add(AgentTool.of("get_meal_plan", "the user's current meal plan (days, meals, recipe ids). input: {}", in -> {
             MealPlan p = plan.get();
             return p == null ? "No meal plan has been generated yet." : p.describe();
         }));

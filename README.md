@@ -90,7 +90,7 @@ Starts the **CLI**. Alternatively `mvn exec:java -Dexec.args="--cli"`.
 mvn test
 ```
 
-Runs the 80 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
+Runs the 86 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
 
 ```bash
 xvfb-run mvn test -Dheadless=false -Dtest=GuiSmokeTest -Dscreenshots=docs/screenshots
@@ -119,7 +119,82 @@ meal-planner> exit
 
 Type `help` for all commands. Multi-word values use double quotes. Expiry dates accept
 `YYYY-MM-DD`, `+N` (N days from today) or `-` (unknown). `trace off` hides the agent's step log.
-A script can be piped in: `java -jar target/meal-planner.jar --cli --echo < script.txt`.
+A script can also be piped in: `java -jar target/meal-planner.jar --cli < script.txt`.
+
+## Standalone CLI: running a task from a file
+
+The agent can run a whole task without the GUI. A task file is a list of CLI commands, one per line;
+lines starting with `#` are comments. The commands run in order, each one is shown with its output,
+and the program exits when the file ends.
+
+### Supported options
+
+Options can be written with one or two dashes, in any letter case (`-input` = `--input`, `-LLMAPI` = `--llmapi`).
+
+| Option | Meaning |
+|--------|---------|
+| *(none)* | Start the GUI (falls back to the CLI on a machine without a display) |
+| `--cli` | Start the interactive command-line interface |
+| `--input <file>` | Run the CLI commands in `<file>`, then exit |
+| `--llm`, `--llmapi` | Require the LLM API configured in `.env`; stop with an error (exit code 3) if no key is set |
+| `--no-llm` | Run without the LLM; hybrid features use their deterministic path, AI-only features say an LLM is needed |
+| `--echo` | Print each command before its output (useful with piped input) |
+| `--help` | Show the options |
+
+Standard input also works: `java -jar target/meal-planner.jar --cli < examples/task.txt`.
+
+### Working example
+
+[`examples/task.txt`](examples/task.txt) asks the agent to plan three vegetarian dinners that use up food
+expiring soon, then produce the shopping list and ask the assistant which meal to cook first:
+
+```
+status
+profile restrictions vegetarian
+pantry expiring 3
+recommend --priority pantry --note "use up food that expires soon"
+plan --priority pantry --days 3 --meals dinner --note "use up food that expires soon"
+shopping
+ask Which planned meal should I cook first so nothing goes to waste?
+exit
+```
+
+Run it with the LLM (requires `LLM_API_KEY` in `.env`):
+
+```bash
+java -jar target/meal-planner.jar -LLMAPI -input examples/task.txt
+```
+
+Or without an LLM:
+
+```bash
+java -jar target/meal-planner.jar --no-llm --input examples/task.txt
+```
+
+Expected output (shortened; with the LLM the plan says "assembled by the AI agent"):
+
+```
+AI Recipe & Meal Planning Agent - command line
+AI enabled: openai/gpt-oss-20b via api.groq.com
+
+meal-planner> profile restrictions vegetarian
+Profile saved.
+...
+meal-planner> plan --priority pantry --days 3 --meals dinner --note "use up food that expires soon"
+Plan ACCEPTED (assembled by the AI agent)
+...
+meal-planner> shopping
+Shopping list:
+[ ] ...
+meal-planner> ask Which planned meal should I cook first so nothing goes to waste?
+...
+(tools used: ...)
+
+meal-planner> exit
+Goodbye.
+```
+
+Write your own task file with any commands from `help` and pass it with `--input`.
 
 ## GUI overview
 
@@ -133,7 +208,7 @@ background; every AI result shows the agent's steps.
 
 ```
 src/main/java/mealplanner/
-  App.java                 entry point (GUI / --cli)
+  App.java                 entry point and command-line options (GUI, --cli, --input, --llm)
   config/AppConfig         .env + environment configuration
   model/                   Recipe(+Builder), Pantry, PantryItem, UserProfile, MealPlan (Observer subject), ...
   service/                 RecipeService, PantryService, ShoppingListService, ShoppingListSynchronizer (observer), catalogue loader
@@ -142,6 +217,7 @@ src/main/java/mealplanner/
   controller/              MealPlannerController (MVC), MealPlanningFacade (Facade)
   ui/                      MealPlannerGUI, MealPlannerCLI, ResultFormatter
 src/main/resources/data/recipes.json   22 seeded recipes (safe sample data)
+examples/task.txt                      example task file for --input
 src/test/java/mealplanner/             JUnit 5 tests (scripted LLM test double, local HTTP stub)
 ```
 

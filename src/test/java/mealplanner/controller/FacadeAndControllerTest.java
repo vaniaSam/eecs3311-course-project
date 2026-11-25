@@ -114,7 +114,7 @@ class FacadeAndControllerTest {
         assertTrue(ok.applied());
         assertEquals("r11", controller.getCurrentPlan().getMeal(first.getDay(), MealType.DINNER).getRecipe().getId());
         assertThrows(IllegalArgumentException.class, () -> controller.replaceMeal("funday", "dinner", "r11"));
-        assertThrows(IllegalArgumentException.class, () -> controller.replaceMeal("monday", "dinner", "r404"));
+        assertThrows(IllegalArgumentException.class, () -> controller.replaceMeal(first.getDay().name(), "dinner", "r404"));
     }
 
     @Test

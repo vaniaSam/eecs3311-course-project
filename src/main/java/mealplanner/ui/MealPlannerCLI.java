@@ -81,8 +81,10 @@ public class MealPlannerCLI {
         out.println(controller.llmStatus());
         out.println("Type 'help' for commands.");
         while (true) {
-            out.print("\nmeal-planner> ");
-            out.flush();
+            if (!echoInput) {
+                out.print("\nmeal-planner> "); // interactive: prompt before the user types
+                out.flush();
+            }
             String line;
             try {
                 line = in.readLine();
@@ -95,7 +97,11 @@ public class MealPlannerCLI {
                 return;
             }
             if (echoInput) {
-                out.println(line); // makes piped/scripted sessions readable
+                // Task file / piped input: skip comments and blank lines, show each command after a prompt.
+                if (line.isBlank() || line.trim().startsWith("#")) {
+                    continue;
+                }
+                out.println("\nmeal-planner> " + line);
             }
             if (!execute(line)) {
                 out.println("Goodbye.");

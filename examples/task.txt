@@ -1,0 +1,14 @@
+# Example task for the meal-planning agent.
+# Run:  java -jar target/meal-planner.jar --input examples/task.txt
+#   or: java -jar target/meal-planner.jar -LLMAPI -input examples/task.txt   (requires LLM_API_KEY in .env)
+# One CLI command per line; lines starting with # are ignored. Type "help" in the CLI for all commands.
+
+# Task: plan three vegetarian dinners that use up food expiring soon, and get the shopping list.
+status
+profile restrictions vegetarian
+pantry expiring 3
+recommend --priority pantry --note "use up food that expires soon"
+plan --priority pantry --days 3 --meals dinner --note "use up food that expires soon"
+shopping
+ask Which planned meal should I cook first so nothing goes to waste?
+exit

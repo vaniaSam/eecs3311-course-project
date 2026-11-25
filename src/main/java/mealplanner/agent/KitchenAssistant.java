@@ -90,7 +90,8 @@ public class KitchenAssistant {
                 continue;
             }
             String thought = JsonExtractor.string(json, "thought", "");
-            if (!thought.isBlank()) {
+            // Skip placeholder thoughts copied from the format example (e.g. "why").
+            if (!thought.isBlank() && thought.trim().length() > 4 && !thought.trim().startsWith("<")) {
                 trace.add("Step " + step + " thought: " + thought);
             }
             String answer = JsonExtractor.string(json, "answer", null);
@@ -101,6 +102,16 @@ public class KitchenAssistant {
             // Accept our {"tool","input"} format and the native function-call shape {"name","arguments"}.
             String toolName = JsonExtractor.string(json, "tool", JsonExtractor.string(json, "name", ""));
             AgentTool tool = tools.get(toolName);
+            if (tool == null) {
+                // gpt-oss sometimes writes its internal channel name (e.g. "commentary") instead of the tool name;
+                // if the reply names exactly one real tool, use that one.
+                AgentTool named = toolMentionedIn(toolName + " " + reply);
+                if (named != null) {
+                    trace.add("Step " + step + ": treated '" + toolName + "' as a call to " + named.name());
+                    tool = named;
+                    toolName = named.name();
+                }
+            }
             String observation;
             if (tool == null) {
                 observation = "ERROR: unknown tool '" + toolName + "'. Available: " + String.join(", ", tools.keySet());
@@ -122,6 +133,21 @@ public class KitchenAssistant {
         }
         return new AssistantReply("I could not finish within " + MAX_STEPS + " steps. Try a more specific question.",
             calls, false, trace);
+    }
+
+    /** The single tool whose name appears in the text, or {@code null} if none or several do. */
+    private AgentTool toolMentionedIn(String text) {
+        AgentTool found = null;
+        for (AgentTool t : tools.values()) {
+            if (java.util.regex.Pattern.compile("\\b" + java.util.regex.Pattern.quote(t.name()) + "\\b")
+                    .matcher(text).find()) {
+                if (found != null) {
+                    return null;
+                }
+                found = t;
+            }
+        }
+        return found;
     }
 
     /** Tool input given as a JSON object or as a JSON-encoded string; anything else means no input. */
@@ -167,8 +193,8 @@ public class KitchenAssistant {
         StringBuilder sb = new StringBuilder("You are the kitchen assistant inside a meal-planning application. "
             + "Answer the user's question using the tools to look up their real data; never invent recipes, "
             + "pantry items or prices. Each reply must be exactly one JSON object, either\n"
-            + "{\"thought\":\"why\",\"tool\":\"tool_name\",\"input\":{...}}\nor\n"
-            + "{\"thought\":\"why\",\"answer\":\"final answer for the user\"}\n"
+            + "{\"thought\":\"<one sentence: what you need and why>\",\"tool\":\"tool_name\",\"input\":{...}}\nor\n"
+            + "{\"thought\":\"<one sentence: why this answers the question>\",\"answer\":\"final answer for the user\"}\n"
             + "You cannot change the user's data; tell them which feature to use for changes. "
             + "For questions about the user's meal plan, shopping list, pantry or profile, use get_meal_plan, "
             + "get_shopping_list, list_pantry or get_profile; search_recipes only searches the recipe collection. "

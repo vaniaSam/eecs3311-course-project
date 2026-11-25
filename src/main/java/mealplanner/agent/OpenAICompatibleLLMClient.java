@@ -76,6 +76,7 @@ public class OpenAICompatibleLLMClient implements LLMClient {
 
         // A provider-side parsing failure (e.g. gpt-oss on Groq producing unreadable output) is random, so the
         // same request is sent once more before the error is reported.
+        int rateLimitRetries = 0;
         for (int attempt = 1; ; attempt++) {
             HttpResponse<String> response;
             try {
@@ -88,6 +89,21 @@ public class OpenAICompatibleLLMClient implements LLMClient {
                 Thread.currentThread().interrupt();
                 throw new LLMException("The LLM request was interrupted", e);
             }
+            if (response.statusCode() == 429 && rateLimitRetries < MAX_RATE_LIMIT_RETRIES) {
+                // Free tiers limit tokens per minute; wait as long as the provider asks, then try again.
+                long waitMillis = retryAfterMillis(response.headers().firstValue("retry-after").orElse(""));
+                if (waitMillis <= MAX_RATE_LIMIT_WAIT_MILLIS) {
+                    rateLimitRetries++;
+                    attempt--; // a rate-limit wait does not count as a parse attempt
+                    try {
+                        sleeper.sleep(waitMillis);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new LLMException("The LLM request was interrupted", e);
+                    }
+                    continue;
+                }
+            }
             try {
                 return parse(response.statusCode(), response.body());
             } catch (ProviderParseException e) {
@@ -97,6 +113,38 @@ public class OpenAICompatibleLLMClient implements LLMClient {
                 }
             }
         }
+    }
+
+    /** Times a rate-limited (HTTP 429) request is retried after waiting. */
+    static final int MAX_RATE_LIMIT_RETRIES = 2;
+    /** Longest wait accepted from a Retry-After header; longer limits are reported to the user instead. */
+    static final long MAX_RATE_LIMIT_WAIT_MILLIS = 30_000;
+    /** Wait used when the provider gives no usable Retry-After value. */
+    static final long DEFAULT_RATE_LIMIT_WAIT_MILLIS = 5_000;
+
+    /** Sleeping is abstracted so tests do not have to wait. */
+    interface Sleeper {
+        void sleep(long millis) throws InterruptedException;
+    }
+
+    private Sleeper sleeper = Thread::sleep;
+
+    /** Test hook: replaces the sleeping strategy. */
+    void setSleeper(Sleeper sleeper) {
+        this.sleeper = sleeper;
+    }
+
+    /** Converts a Retry-After value in seconds (e.g. "7" or "2.5") to milliseconds. */
+    static long retryAfterMillis(String header) {
+        try {
+            double seconds = Double.parseDouble(header.trim());
+            if (seconds >= 0 && Double.isFinite(seconds)) {
+                return (long) Math.ceil(seconds * 1000);
+            }
+        } catch (NumberFormatException e) {
+            // fall through to the default
+        }
+        return DEFAULT_RATE_LIMIT_WAIT_MILLIS;
     }
 
     /** Requests sent in total when the provider reports that it could not parse the model's output. */

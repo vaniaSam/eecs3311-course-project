@@ -185,4 +185,46 @@ class LLMInfrastructureTest {
         assertTrue(OpenAICompatibleLLMClient.isOutputParseFailure(PARSE_FAILED));
         assertFalse(OpenAICompatibleLLMClient.isOutputParseFailure("{\"error\":{\"code\":\"tool_use_failed\"}}"));
     }
+
+    private String startRateLimited(java.util.concurrent.atomic.AtomicInteger calls, int limitedCalls, String retryAfter)
+            throws IOException {
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/v1/chat/completions", exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            boolean limited = calls.incrementAndGet() <= limitedCalls;
+            byte[] bytes = (limited ? "{\"error\":{\"message\":\"Rate limit reached\",\"code\":\"rate_limit_exceeded\"}}"
+                : "{\"choices\":[{\"message\":{\"content\":\"fine\"}}]}").getBytes(StandardCharsets.UTF_8);
+            if (limited) {
+                exchange.getResponseHeaders().add("retry-after", retryAfter);
+            }
+            exchange.sendResponseHeaders(limited ? 429 : 200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        server.start();
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/v1";
+    }
+
+    @Test
+    void rateLimitWaitsForRetryAfterThenSucceeds() throws IOException {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.List<Long> waits = new java.util.ArrayList<>();
+        OpenAICompatibleLLMClient client = new OpenAICompatibleLLMClient(startRateLimited(calls, 2, "2.5"), "k", "m", 10);
+        client.setSleeper(waits::add);
+        assertEquals("fine", client.complete("hi"));
+        assertEquals(3, calls.get());
+        assertEquals(java.util.List.of(2500L, 2500L), waits);
+    }
+
+    @Test
+    void rateLimitIsReportedWhenTheWaitIsTooLongOrKeepsHappening() throws IOException {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        OpenAICompatibleLLMClient client = new OpenAICompatibleLLMClient(startRateLimited(calls, 9, "120"), "k", "m", 10);
+        client.setSleeper(ms -> fail("should not wait 120 s"));
+        LLMException e = assertThrows(LLMException.class, () -> client.complete("hi"));
+        assertTrue(e.getMessage().contains("429"));
+        assertEquals(1, calls.get());
+        assertEquals(OpenAICompatibleLLMClient.DEFAULT_RATE_LIMIT_WAIT_MILLIS, OpenAICompatibleLLMClient.retryAfterMillis("soon"));
+    }
 }

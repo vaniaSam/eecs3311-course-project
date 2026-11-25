@@ -90,7 +90,7 @@ Starts the **CLI**. Alternatively `mvn exec:java -Dexec.args="--cli"`.
 mvn test
 ```
 
-Runs the 91 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
+Runs the 95 headless tests. The GUI smoke test (drives every tab and saves screenshots) needs a display:
 
 ```bash
 xvfb-run mvn test -Dheadless=false -Dtest=GuiSmokeTest -Dscreenshots=docs/screenshots

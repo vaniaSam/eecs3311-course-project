@@ -132,4 +132,28 @@ class KitchenAssistantTest {
         String system = llm.calls.get(0).get(0).content();
         assertTrue(system.contains("use get_meal_plan"));
     }
+
+    @Test
+    void channelNameInsteadOfToolNameIsMappedToTheRealTool() {
+        ScriptedLLMClient llm = new ScriptedLLMClient()
+            .reply("{\"tool\":\"commentary\",\"input\":{},\"thought\":\"call get_meal_plan to see the plan\"}")
+            .reply("{\"answer\":\"No plan yet.\"}");
+        AssistantReply reply = assistant(llm).ask("what is in my plan?");
+        assertTrue(reply.success());
+        assertEquals(1, reply.toolCalls().size());
+        assertTrue(reply.toolCalls().get(0).startsWith("get_meal_plan"));
+        String observation = llm.calls.get(1).get(llm.calls.get(1).size() - 1).content();
+        assertTrue(observation.contains("No meal plan has been generated yet"), observation);
+    }
+
+    @Test
+    void placeholderThoughtsAreNotShownInTheTrace() {
+        ScriptedLLMClient llm = new ScriptedLLMClient()
+            .reply("{\"thought\":\"why\",\"tool\":\"get_meal_plan\",\"input\":{}}")
+            .reply("{\"thought\":\"The plan answers it\",\"answer\":\"Tuesday first.\"}");
+        AssistantReply reply = assistant(llm).ask("which first?");
+        String trace = reply.trace().describe();
+        assertFalse(trace.contains("thought: why"), trace);
+        assertTrue(trace.contains("thought: The plan answers it"), trace);
+    }
 }

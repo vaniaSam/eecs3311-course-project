@@ -142,4 +142,47 @@ class LLMInfrastructureTest {
         assertEquals("expiring_items", JsonExtractor.extractObject(reply).get("name").getAsString());
         assertThrows(LLMException.class, () -> client.parse(400, "{\"error\":{\"code\":\"other\"}}"));
     }
+
+    private static final String PARSE_FAILED = "{\"error\":{\"message\":\"Parsing failed. The model generated output "
+        + "that could not be parsed. Please adjust your prompt. See 'failed_generation' for more details.\","
+        + "\"type\":\"invalid_request_error\",\"code\":\"output_parse_failed\",\"failed_generation\":\"<|channel|>\"}}";
+
+    private String startSequence(java.util.concurrent.atomic.AtomicInteger calls, int failuresBeforeSuccess)
+            throws IOException {
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/v1/chat/completions", exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            boolean fail = calls.incrementAndGet() <= failuresBeforeSuccess;
+            byte[] bytes = (fail ? PARSE_FAILED
+                : "{\"choices\":[{\"message\":{\"content\":\"{\\\"answer\\\":\\\"ok\\\"}\"}}]}")
+                .getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(fail ? 400 : 200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        server.start();
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/v1";
+    }
+
+    @Test
+    void providerParseFailureIsRetriedOnce() throws IOException {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        String url = startSequence(calls, 1);
+        String reply = new OpenAICompatibleLLMClient(url, "k", "m", 10).complete("hi");
+        assertEquals("ok", JsonExtractor.extractObject(reply).get("answer").getAsString());
+        assertEquals(2, calls.get());
+    }
+
+    @Test
+    void repeatedProviderParseFailureIsReportedClearly() throws IOException {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        String url = startSequence(calls, 5);
+        LLMException e = assertThrows(LLMException.class,
+            () -> new OpenAICompatibleLLMClient(url, "k", "m", 10).complete("hi"));
+        assertTrue(e.getMessage().contains("could not be read"), e.getMessage());
+        assertEquals(OpenAICompatibleLLMClient.MAX_PARSE_ATTEMPTS, calls.get());
+        assertTrue(OpenAICompatibleLLMClient.isOutputParseFailure(PARSE_FAILED));
+        assertFalse(OpenAICompatibleLLMClient.isOutputParseFailure("{\"error\":{\"code\":\"tool_use_failed\"}}"));
+    }
 }

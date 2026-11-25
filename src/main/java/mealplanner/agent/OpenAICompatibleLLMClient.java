@@ -74,18 +74,41 @@ public class OpenAICompatibleLLMClient implements LLMClient {
             .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
             .build();
 
-        HttpResponse<String> response;
-        try {
-            response = http.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (HttpTimeoutException e) {
-            throw new LLMException("The LLM request timed out after " + timeout.toSeconds() + " s", e);
-        } catch (IOException e) {
-            throw new LLMException("Could not reach the LLM service: " + e.getMessage(), e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new LLMException("The LLM request was interrupted", e);
+        // A provider-side parsing failure (e.g. gpt-oss on Groq producing unreadable output) is random, so the
+        // same request is sent once more before the error is reported.
+        for (int attempt = 1; ; attempt++) {
+            HttpResponse<String> response;
+            try {
+                response = http.send(request, HttpResponse.BodyHandlers.ofString());
+            } catch (HttpTimeoutException e) {
+                throw new LLMException("The LLM request timed out after " + timeout.toSeconds() + " s", e);
+            } catch (IOException e) {
+                throw new LLMException("Could not reach the LLM service: " + e.getMessage(), e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new LLMException("The LLM request was interrupted", e);
+            }
+            try {
+                return parse(response.statusCode(), response.body());
+            } catch (ProviderParseException e) {
+                if (attempt >= MAX_PARSE_ATTEMPTS) {
+                    throw new LLMException("The model's reply could not be read by the LLM provider after "
+                        + MAX_PARSE_ATTEMPTS + " attempts. Please try again.", e);
+                }
+            }
         }
-        return parse(response.statusCode(), response.body());
+    }
+
+    /** Requests sent in total when the provider reports that it could not parse the model's output. */
+    static final int MAX_PARSE_ATTEMPTS = 2;
+
+    /** The provider could not parse the model's own output; sending the request again usually succeeds. */
+    static final class ProviderParseException extends LLMException {
+        private static final long serialVersionUID = 1L;
+
+        ProviderParseException(String message) {
+            super(message);
+        }
     }
 
     /** Extracts the reply text from a chat-completions response body. Package-private for tests. */
@@ -103,6 +126,9 @@ public class OpenAICompatibleLLMClient implements LLMClient {
                 // call, which the provider rejects because no API tools were declared. The attempted call
                 // is returned in "failed_generation"; hand it to the agent, which accepts that shape.
                 return attempted;
+            }
+            if (isOutputParseFailure(responseBody)) {
+                throw new ProviderParseException("The LLM provider could not parse the model's output");
             }
         }
         if (status < 200 || status >= 300) {
@@ -126,6 +152,21 @@ public class OpenAICompatibleLLMClient implements LLMClient {
                 throw e;
             }
             throw new LLMException("Unexpected response format from the LLM provider", e);
+        }
+    }
+
+    /** True for an HTTP 400 body saying the provider could not parse the model's generated output. */
+    static boolean isOutputParseFailure(String body) {
+        try {
+            JsonObject error = JsonParser.parseString(body).getAsJsonObject().getAsJsonObject("error");
+            if (error == null) {
+                return false;
+            }
+            String code = JsonExtractor.string(error, "code", "");
+            String message = JsonExtractor.string(error, "message", "");
+            return code.equals("output_parse_failed") || message.startsWith("Parsing failed");
+        } catch (RuntimeException e) {
+            return false;
         }
     }
 
